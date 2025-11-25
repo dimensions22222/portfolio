@@ -1,3 +1,7 @@
+// mobile_portfolio_landing_page.dart
+// ignore_for_file: unused_element, unused_element_parameter, unused_import
+
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,45 +14,34 @@ class PortfolioLandingPage extends StatefulWidget {
 
 class _PortfolioLandingPageState extends State<PortfolioLandingPage>
     with TickerProviderStateMixin {
-  // hover tracking
-  final Map<String, bool> _hover = {
-    "Home": false,
-    "Case Studies": false,
-    "Testimonials": false,
-    "Recent work": false,
-    "Get In Touch": false,
-  };
-
-  // hover for company boxes
+  final ScrollController _scrollCtrl = ScrollController();
   final Map<String, bool> _boxHover = {};
-
-  // animations
-  late AnimationController fadeCtrl;
-  late AnimationController slideCtrl;
+  bool _countersTriggered = false;
+  late AnimationController _particleCtrl;
 
   @override
   void initState() {
     super.initState();
-
-    fadeCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..forward();
-
-    slideCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..forward();
+    _particleCtrl =
+        AnimationController(vsync: this, duration: const Duration(seconds: 18))
+          ..repeat();
+    _scrollCtrl.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    fadeCtrl.dispose();
-    slideCtrl.dispose();
+    _particleCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
-  // ------------------ URL LAUNCH METHOD ------------------
+  void _onScroll() {
+    if (_countersTriggered) return;
+    if (_scrollCtrl.offset > 300) {
+      setState(() => _countersTriggered = true);
+    }
+  }
+
   Future<void> openUrl(String url) async {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
@@ -58,287 +51,242 @@ class _PortfolioLandingPageState extends State<PortfolioLandingPage>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, size) {
-        final bool isMobile = size.maxWidth < 750;
-
-        return Scaffold(
-          backgroundColor: const Color(0xFF000000),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ------------------ NAVBAR ------------------
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // navigation
-                    if (!isMobile)
-                      Row(
-                        children: [
-                          _navItem("Home", "https://your-home-url.com"),
-                          _navItem("Case Studies",
-                              "https://your-casestudies.com"),
-                          _navItem("Testimonials",
-                              "https://your-testimonials.com"),
-                          _navItem("Recent work", "https://your-work.com"),
-                          _navItem("Get In Touch", "https://your-contact.com"),
-                        ],
-                      )
-                    else
-                      const SizedBox(),
-
-                    // Social Icons
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => openUrl("https://linkedin.com"),
-                          child: MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: const Icon(Icons.linked_camera,
-                                color: Colors.white),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        GestureDetector(
-                          onTap: () => openUrl("https://dribbble.com"),
-                          child: MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: const Icon(Icons.brush, color: Colors.white),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        GestureDetector(
-                          onTap: () => openUrl("mailto:you@email.com"),
-                          child: MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: const Icon(Icons.alternate_email,
-                                color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-
-                const SizedBox(height: 80),
-
-                // ------------------ HERO SECTION ------------------
-                FadeTransition(
-                  opacity: fadeCtrl,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.1),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                        parent: slideCtrl, curve: Curves.easeOut)),
-                    child: isMobile
-                        ? _buildMobileHero()
-                        : _buildDesktopHero(),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Positioned.fill(child: _Background(particleCtrl: _particleCtrl)),
+          Positioned.fill(
+            child: SingleChildScrollView(
+              controller: _scrollCtrl,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  // Mobile Hero
+                  _heroText(),
+                  const SizedBox(height: 30),
+                  ClipOval(
+                    child: SizedBox(
+                      width: 220,
+                      height: 220,
+                      child:
+                          Image.asset("assets/hero.jpg", fit: BoxFit.cover),
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 100),
-
-                // ------------------ WORKED WITH ------------------
-                Text(
-                  "Worked with",
-                  style: TextStyle(
-                    color: Colors.grey.shade300,
-                    fontSize: 18,
+                  const SizedBox(height: 80),
+                  // Worked With
+                  _WorkedWithSection(
+                    boxHover: _boxHover,
+                    triggerCounters: _countersTriggered,
                   ),
-                ),
-
-                const SizedBox(height: 30),
-
-                Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  children: [
-                    _companyBox("ClickUp"),
-                    _companyBox("Dropbox"),
-                    _companyBox("PAYCHEX"),
-                    _companyBox("elastic"),
-                    _companyBox("stripe"),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ------------------ MOBILE HERO ------------------
-  Widget _buildMobileHero() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _heroText(),
-        const SizedBox(height: 40),
-        _heroImage(),
-      ],
-    );
-  }
-
-  // ------------------ DESKTOP HERO ------------------
-  Widget _buildDesktopHero() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // left
-        Expanded(child: _heroText()),
-        const SizedBox(width: 80),
-        _heroImage(),
-      ],
-    );
-  }
-
-  // ------------------ HERO TEXT LEFT ------------------
-  Widget _heroText() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "ALEX DEV",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 42,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          "Intro text: Lorem ipsum dolor sit amet, consectetur\n"
-          "adipiscing elit, sed do eiusmod tempor incididunt ut\n"
-          "labore et dolore magna aliqua.",
-          style: TextStyle(
-            color: Colors.grey.shade400,
-            fontSize: 17,
-            height: 1.6,
-          ),
-        ),
-        const SizedBox(height: 30),
-
-        // CTA BUTTON WITH SCALE ANIMATION
-        MouseRegion(
-          onEnter: (_) => setState(() => _hover["CTA"] = true),
-          onExit: (_) => setState(() => _hover["CTA"] = false),
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => openUrl("https://your-cta-link.com"),
-            child: AnimatedScale(
-              scale: _hover["CTA"] == true ? 1.06 : 1.0,
-              duration: const Duration(milliseconds: 150),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2ECC40),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green.withOpacity(0.3),
-                      blurRadius: 20,
-                      spreadRadius: 2,
-                    )
-                  ],
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
-                child: const Text(
-                  "Let’s get started  →",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                  const SizedBox(height: 50),
+                ],
               ),
             ),
           ),
-        )
+        ],
+      ),
+    );
+  }
+
+  // ------------------ HERO TEXT ------------------
+  Widget _heroText() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Text(
+          "ALEX DEV",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.greenAccent,
+            fontSize: 36,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          "Flutter Developer • Creative Builder\n• Future Full-Stack Dev",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 16,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 24),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueGrey,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          onPressed: () => openUrl("https://your-cta-link.com"),
+          child: const Text("Let’s get started →"),
+        ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: () => openUrl("mailto:you@email.com"),
+          child: const Text(
+            "Get In Touch",
+            style: TextStyle(color: Colors.greenAccent),
+          ),
+        ),
       ],
     );
   }
+}
 
-  // ------------------ HERO IMAGE RIGHT ------------------
-  Widget _heroImage() {
-    return ClipOval(
-      child: SizedBox(
-        width: 300,
-        height: 300,
-        child: Image.asset(
-          "assets/profile.png", // update YOUR PATH
-          fit: BoxFit.cover,
+// ------------------ BACKGROUND ------------------
+class _Background extends StatelessWidget {
+  final AnimationController particleCtrl;
+  const _Background({required this.particleCtrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment(-0.3, -0.4),
+          radius: 1.2,
+          colors: [Colors.white12, Colors.blueGrey],
         ),
       ),
     );
   }
+}
 
-  // ------------------ NAV TEXT ITEM ------------------
-  Widget _navItem(String text, String url) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hover[text] = true),
-      onExit: (_) => setState(() => _hover[text] = false),
-      child: GestureDetector(
-        onTap: () => openUrl(url),
-        child: AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 180),
-          style: TextStyle(
-            color: _hover[text]! ? Colors.greenAccent : Colors.white,
-            fontSize: 16,
-            fontWeight: _hover[text]! ? FontWeight.bold : FontWeight.normal,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.only(right: 30),
-            child: Text(text),
-          ),
+// ------------------ WORKED WITH SECTION ------------------
+class _WorkedWithSection extends StatelessWidget {
+  final Map<String, bool> boxHover;
+  final bool triggerCounters;
+  const _WorkedWithSection(
+      {required this.boxHover, required this.triggerCounters});
+
+  @override
+  Widget build(BuildContext context) {
+    final companies = ["ClickUp", "Dropbox", "PAYCHEX", "elastic", "stripe"];
+    return Column(
+      children: [
+        const Text(
+          "Worked with",
+          style: TextStyle(color: Colors.greenAccent, fontSize: 18),
         ),
-      ),
-    );
-  }
-
-  // ------------------ COMPANY BOX ------------------
-  Widget _companyBox(String title) {
-    _boxHover.putIfAbsent(title, () => false);
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _boxHover[title] = true),
-      onExit: (_) => setState(() => _boxHover[title] = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        width: 150,
-        height: 70,
-        margin: const EdgeInsets.only(right: 0),
-        transform: _boxHover[title] == true
-            ? (Matrix4.identity()..translate(0, -6, 0))
-            : Matrix4.identity(),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: const Color(0xFF111111),
-          border: Border.all(color: Colors.grey.shade800),
-          boxShadow: _boxHover[title] == true
-              ? [
-                  BoxShadow(
-                      color: Colors.green.withOpacity(0.25),
-                      blurRadius: 20,
-                      spreadRadius: 1)
-                ]
-              : [],
+        const SizedBox(height: 20),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          alignment: WrapAlignment.center,
+          children: companies.map((c) => _CompanyTile(title: c)).toList(),
         ),
-        child: Center(
-          child: Text(
-            title,
-            style: TextStyle(
-              color: Colors.grey.shade400,
-              fontSize: 16,
+        const SizedBox(height: 28),
+        Wrap(
+          spacing: 16,
+          alignment: WrapAlignment.center,
+          children: [
+            _AnimatedCounter(
+              label: "Years",
+              endValue: 5,
+              trigger: triggerCounters,
             ),
-          ),
+            _AnimatedCounter(
+              label: "Projects",
+              endValue: 30,
+              trigger: triggerCounters,
+            ),
+            _AnimatedCounter(
+              label: "Clients",
+              endValue: 10,
+              trigger: triggerCounters,
+            ),
+          ],
         ),
+      ],
+    );
+  }
+}
+
+class _CompanyTile extends StatelessWidget {
+  final String title;
+  const _CompanyTile({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 120,
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.grey[900],
       ),
+      alignment: Alignment.center,
+      child: Text(
+        title,
+        style: const TextStyle(color: Colors.white70, fontSize: 14),
+      ),
+    );
+  }
+}
+
+class _AnimatedCounter extends StatefulWidget {
+  final String label;
+  final int endValue;
+  final bool trigger;
+  const _AnimatedCounter(
+      {required this.label, required this.endValue, this.trigger = false});
+
+  @override
+  State<_AnimatedCounter> createState() => _AnimatedCounterState();
+}
+
+class _AnimatedCounterState extends State<_AnimatedCounter>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+  int displayed = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(seconds: 10));
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut)
+      ..addListener(() {
+        setState(() {
+          displayed = (_anim.value * widget.endValue).round();
+        });
+      });
+    if (widget.trigger) _ctrl.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AnimatedCounter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.trigger && !oldWidget.trigger) _ctrl.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          "$displayed+",
+          style: const TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.greenAccent),
+        ),
+        const SizedBox(height: 4),
+        Text(widget.label, style: const TextStyle(color: Colors.white70)),
+      ],
     );
   }
 }
