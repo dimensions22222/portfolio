@@ -18,19 +18,29 @@ class _PortfolioLandingPageState extends State<PortfolioLandingPage>
   final Map<String, bool> _boxHover = {};
   bool _countersTriggered = false;
   late AnimationController _particleCtrl;
+  late AnimationController _bgShiftCtrl;
 
   @override
   void initState() {
     super.initState();
+
+    // Floating particles controller
     _particleCtrl =
         AnimationController(vsync: this, duration: const Duration(seconds: 18))
           ..repeat();
+
+    // Moving gradient controller
+    _bgShiftCtrl =
+        AnimationController(vsync: this, duration: const Duration(seconds: 25))
+          ..repeat(reverse: true);
+
     _scrollCtrl.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _particleCtrl.dispose();
+    _bgShiftCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
   }
@@ -55,7 +65,19 @@ class _PortfolioLandingPageState extends State<PortfolioLandingPage>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          Positioned.fill(child: _Background(particleCtrl: _particleCtrl)),
+          /// ✨ Animated gradient + floating particles
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _bgShiftCtrl,
+              builder: (context, _) {
+                return _Background(
+                  particleCtrl: _particleCtrl,
+                  shiftValue: _bgShiftCtrl.value,
+                );
+              },
+            ),
+          ),
+
           Positioned.fill(
             child: SingleChildScrollView(
               controller: _scrollCtrl,
@@ -65,23 +87,43 @@ class _PortfolioLandingPageState extends State<PortfolioLandingPage>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
-                  // Mobile Hero
                   _heroText(),
+
                   const SizedBox(height: 30),
-                  ClipOval(
-                    child: SizedBox(
-                      width: 220,
-                      height: 220,
-                      child:
-                          Image.asset("assets/hero.jpg", fit: BoxFit.cover),
+
+                  /// ✨ Glow behind hero image
+                  Container(
+                    width: 260,
+                    height: 260,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.greenAccent.withOpacity(0.3),
+                          blurRadius: 50,
+                          spreadRadius: 10,
+                        )
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: SizedBox(
+                        width: 220,
+                        height: 220,
+                        child: Image.asset(
+                          "assets/hero.jpg",
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
                   ),
+
                   const SizedBox(height: 80),
-                  // Worked With
+
                   _WorkedWithSection(
                     boxHover: _boxHover,
                     triggerCounters: _countersTriggered,
                   ),
+
                   const SizedBox(height: 50),
                 ],
               ),
@@ -144,20 +186,71 @@ class _PortfolioLandingPageState extends State<PortfolioLandingPage>
 // ------------------ BACKGROUND ------------------
 class _Background extends StatelessWidget {
   final AnimationController particleCtrl;
-  const _Background({required this.particleCtrl});
+  final double shiftValue;
+
+  const _Background({
+    required this.particleCtrl,
+    required this.shiftValue,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(-0.3, -0.4),
-          radius: 1.2,
-          colors: [Colors.white12, Colors.blueGrey],
+    return Stack(
+      children: [
+        /// 🌈 Smooth shifting gradient
+        Container(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(shiftValue * 2 - 1, shiftValue * -2 + 1),
+              radius: 1.5,
+              colors: const [
+                Colors.white12,
+                Colors.blueGrey,
+                Colors.black,
+              ],
+            ),
+          ),
         ),
-      ),
+
+        /// 🌌 Floating particles
+        AnimatedBuilder(
+          animation: particleCtrl,
+          builder: (_, __) {
+            return CustomPaint(
+              painter: _ParticlePainter(particleCtrl.value),
+            );
+          },
+        ),
+      ],
     );
   }
+}
+
+/// Floating glowing particles
+class _ParticlePainter extends CustomPainter {
+  final double progress;
+  final Random _rng = Random();
+
+  _ParticlePainter(this.progress);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white24;
+    const particleCount = 45;
+
+    for (int i = 0; i < particleCount; i++) {
+      final x = (size.width * _rng.nextDouble());
+      final y = (size.height * ((i / particleCount + progress) % 1));
+      final radius = _rng.nextDouble() * 2 + 0.8;
+
+      paint.color = Colors.white.withOpacity(0.1 + _rng.nextDouble() * 0.3);
+
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ParticlePainter oldDelegate) => true;
 }
 
 // ------------------ WORKED WITH SECTION ------------------
@@ -177,32 +270,24 @@ class _WorkedWithSection extends StatelessWidget {
           style: TextStyle(color: Colors.greenAccent, fontSize: 18),
         ),
         const SizedBox(height: 20),
+
+        /// ✨ Shimmering logo boxes
         Wrap(
           spacing: 16,
           runSpacing: 16,
           alignment: WrapAlignment.center,
-          children: companies.map((c) => _CompanyTile(title: c)).toList(),
+          children:
+              companies.map((c) => _CompanyTile(title: c)).toList(),
         ),
+
         const SizedBox(height: 28),
         Wrap(
           spacing: 16,
           alignment: WrapAlignment.center,
           children: [
-            _AnimatedCounter(
-              label: "Years",
-              endValue: 5,
-              trigger: triggerCounters,
-            ),
-            _AnimatedCounter(
-              label: "Projects",
-              endValue: 30,
-              trigger: triggerCounters,
-            ),
-            _AnimatedCounter(
-              label: "Clients",
-              endValue: 10,
-              trigger: triggerCounters,
-            ),
+            _AnimatedCounter(label: "Years", endValue: 5, trigger: triggerCounters),
+            _AnimatedCounter(label: "Projects", endValue: 30, trigger: triggerCounters),
+            _AnimatedCounter(label: "Clients", endValue: 10, trigger: triggerCounters),
           ],
         ),
       ],
@@ -216,17 +301,30 @@ class _CompanyTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 120,
-      height: 60,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[900],
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        title,
-        style: const TextStyle(color: Colors.white70, fontSize: 14),
+    return ShaderMask(
+      shaderCallback: (bounds) {
+        return LinearGradient(
+          colors: [
+            Colors.white.withOpacity(0.9),
+            Colors.white24,
+            Colors.white.withOpacity(0.9),
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ).createShader(bounds);
+      },
+      blendMode: BlendMode.srcATop,
+      child: Container(
+        width: 120,
+        height: 60,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.grey[900],
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          title,
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
       ),
     );
   }
