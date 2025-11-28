@@ -1,390 +1,390 @@
-// mobile_portfolio_landing_page.dart
-// ignore_for_file: unused_element, unused_element_parameter, unused_import
+// // mobile_portfolio_landing_page.dart
+// // ignore_for_file: unused_element, unused_element_parameter, unused_import
 
-import 'dart:math';
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'dart:math';
+// import 'package:flutter/material.dart';
+// import 'package:url_launcher/url_launcher.dart';
 
-class PortfolioLandingPage extends StatefulWidget {
-  const PortfolioLandingPage({super.key});
+// class PortfolioLandingPage extends StatefulWidget {
+//   const PortfolioLandingPage({super.key});
 
-  @override
-  State<PortfolioLandingPage> createState() => _PortfolioLandingPageState();
-}
+//   @override
+//   State<PortfolioLandingPage> createState() => _PortfolioLandingPageState();
+// }
 
-class _PortfolioLandingPageState extends State<PortfolioLandingPage>
-    with TickerProviderStateMixin {
-  final ScrollController _scrollCtrl = ScrollController();
-  final Map<String, bool> _boxHover = {};
-  bool _countersTriggered = false;
-  late AnimationController _particleCtrl;
-  late AnimationController _bgShiftCtrl;
+// class _PortfolioLandingPageState extends State<PortfolioLandingPage>
+//     with TickerProviderStateMixin {
+//   final ScrollController _scrollCtrl = ScrollController();
+//   final Map<String, bool> _boxHover = {};
+//   bool _countersTriggered = false;
+//   late AnimationController _particleCtrl;
+//   late AnimationController _bgShiftCtrl;
 
-  @override
-  void initState() {
-    super.initState();
+//   @override
+//   void initState() {
+//     super.initState();
 
-    // Floating particles controller
-    _particleCtrl =
-        AnimationController(vsync: this, duration: const Duration(seconds: 18))
-          ..repeat();
+//     // Floating particles controller
+//     _particleCtrl =
+//         AnimationController(vsync: this, duration: const Duration(seconds: 18))
+//           ..repeat();
 
-    // Moving gradient controller
-    _bgShiftCtrl =
-        AnimationController(vsync: this, duration: const Duration(seconds: 25))
-          ..repeat(reverse: true);
+//     // Moving gradient controller
+//     _bgShiftCtrl =
+//         AnimationController(vsync: this, duration: const Duration(seconds: 25))
+//           ..repeat(reverse: true);
 
-    _scrollCtrl.addListener(_onScroll);
-  }
+//     _scrollCtrl.addListener(_onScroll);
+//   }
 
-  @override
-  void dispose() {
-    _particleCtrl.dispose();
-    _bgShiftCtrl.dispose();
-    _scrollCtrl.dispose();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     _particleCtrl.dispose();
+//     _bgShiftCtrl.dispose();
+//     _scrollCtrl.dispose();
+//     super.dispose();
+//   }
 
-  void _onScroll() {
-    if (_countersTriggered) return;
-    if (_scrollCtrl.offset > 300) {
-      setState(() => _countersTriggered = true);
-    }
-  }
+//   void _onScroll() {
+//     if (_countersTriggered) return;
+//     if (_scrollCtrl.offset > 300) {
+//       setState(() => _countersTriggered = true);
+//     }
+//   }
 
-  Future<void> openUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not launch $url');
-    }
-  }
+//   Future<void> openUrl(String url) async {
+//     final uri = Uri.parse(url);
+//     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+//       throw Exception('Could not launch $url');
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          /// ✨ Animated gradient + floating particles
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _bgShiftCtrl,
-              builder: (context, _) {
-                return _Background(
-                  particleCtrl: _particleCtrl,
-                  shiftValue: _bgShiftCtrl.value,
-                );
-              },
-            ),
-          ),
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.black,
+//       body: Stack(
+//         children: [
+//           /// ✨ Animated gradient + floating particles
+//           Positioned.fill(
+//             child: AnimatedBuilder(
+//               animation: _bgShiftCtrl,
+//               builder: (context, _) {
+//                 return _Background(
+//                   particleCtrl: _particleCtrl,
+//                   shiftValue: _bgShiftCtrl.value,
+//                 );
+//               },
+//             ),
+//           ),
 
-          Positioned.fill(
-            child: SingleChildScrollView(
-              controller: _scrollCtrl,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 20),
-                  _heroText(),
+//           Positioned.fill(
+//             child: SingleChildScrollView(
+//               controller: _scrollCtrl,
+//               padding:
+//                   const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.center,
+//                 children: [
+//                   const SizedBox(height: 20),
+//                   _heroText(),
 
-                  const SizedBox(height: 30),
+//                   const SizedBox(height: 30),
 
-                  /// ✨ Glow behind hero image
-                  Container(
-                    width: 260,
-                    height: 260,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.greenAccent.withOpacity(0.3),
-                          blurRadius: 50,
-                          spreadRadius: 10,
-                        )
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: SizedBox(
-                        width: 220,
-                        height: 220,
-                        child: Image.asset(
-                          "assets/hero.jpg",
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
+//                   /// ✨ Glow behind hero image
+//                   Container(
+//                     width: 260,
+//                     height: 260,
+//                     decoration: BoxDecoration(
+//                       shape: BoxShape.circle,
+//                       boxShadow: [
+//                         BoxShadow(
+//                           color: Colors.greenAccent.withOpacity(0.3),
+//                           blurRadius: 50,
+//                           spreadRadius: 10,
+//                         )
+//                       ],
+//                     ),
+//                     child: ClipOval(
+//                       child: SizedBox(
+//                         width: 220,
+//                         height: 220,
+//                         child: Image.asset(
+//                           "assets/hero.jpg",
+//                           fit: BoxFit.cover,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
 
-                  const SizedBox(height: 80),
+//                   const SizedBox(height: 80),
 
-                  _WorkedWithSection(
-                    boxHover: _boxHover,
-                    triggerCounters: _countersTriggered,
-                  ),
+//                   _WorkedWithSection(
+//                     boxHover: _boxHover,
+//                     triggerCounters: _countersTriggered,
+//                   ),
 
-                  const SizedBox(height: 50),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+//                   const SizedBox(height: 50),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 
-  // ------------------ HERO TEXT ------------------
-  Widget _heroText() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Text(
-          "ALEX DEV",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.greenAccent,
-            fontSize: 36,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          "Flutter Developer • Creative Builder\n• Future Full-Stack Dev",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 16,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueGrey,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-          onPressed: () => openUrl("https://your-cta-link.com"),
-          child: const Text("Let’s get started →"),
-        ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: () => openUrl("mailto:you@email.com"),
-          child: const Text(
-            "Get In Touch",
-            style: TextStyle(color: Colors.greenAccent),
-          ),
-        ),
-      ],
-    );
-  }
-}
+//   // ------------------ HERO TEXT ------------------
+//   Widget _heroText() {
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.center,
+//       children: [
+//         const Text(
+//           "ALEX DEV",
+//           textAlign: TextAlign.center,
+//           style: TextStyle(
+//             color: Colors.greenAccent,
+//             fontSize: 36,
+//             fontWeight: FontWeight.bold,
+//           ),
+//         ),
+//         const SizedBox(height: 16),
+//         const Text(
+//           "Flutter Developer • Creative Builder\n• Future Full-Stack Dev",
+//           textAlign: TextAlign.center,
+//           style: TextStyle(
+//             color: Colors.white70,
+//             fontSize: 16,
+//             height: 1.5,
+//           ),
+//         ),
+//         const SizedBox(height: 24),
+//         ElevatedButton(
+//           style: ElevatedButton.styleFrom(
+//             backgroundColor: Colors.blueGrey,
+//             foregroundColor: Colors.white,
+//             padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+//             shape:
+//                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+//           ),
+//           onPressed: () => openUrl("https://your-cta-link.com"),
+//           child: const Text("Let’s get started →"),
+//         ),
+//         const SizedBox(height: 12),
+//         TextButton(
+//           onPressed: () => openUrl("mailto:you@email.com"),
+//           child: const Text(
+//             "Get In Touch",
+//             style: TextStyle(color: Colors.greenAccent),
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }
 
-// ------------------ BACKGROUND ------------------
-class _Background extends StatelessWidget {
-  final AnimationController particleCtrl;
-  final double shiftValue;
+// // ------------------ BACKGROUND ------------------
+// class _Background extends StatelessWidget {
+//   final AnimationController particleCtrl;
+//   final double shiftValue;
 
-  const _Background({
-    required this.particleCtrl,
-    required this.shiftValue,
-  });
+//   const _Background({
+//     required this.particleCtrl,
+//     required this.shiftValue,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        /// 🌈 Smooth shifting gradient
-        Container(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment(shiftValue * 2 - 1, shiftValue * -2 + 1),
-              radius: 1.5,
-              colors: const [
-                Colors.white12,
-                Colors.blueGrey,
-                Colors.black,
-              ],
-            ),
-          ),
-        ),
+//   @override
+//   Widget build(BuildContext context) {
+//     return Stack(
+//       children: [
+//         /// 🌈 Smooth shifting gradient
+//         Container(
+//           decoration: BoxDecoration(
+//             gradient: RadialGradient(
+//               center: Alignment(shiftValue * 2 - 1, shiftValue * -2 + 1),
+//               radius: 1.5,
+//               colors: const [
+//                 Colors.white12,
+//                 Colors.blueGrey,
+//                 Colors.black,
+//               ],
+//             ),
+//           ),
+//         ),
 
-        /// 🌌 Floating particles
-        AnimatedBuilder(
-          animation: particleCtrl,
-          builder: (_, __) {
-            return CustomPaint(
-              painter: _ParticlePainter(particleCtrl.value),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
+//         /// 🌌 Floating particles
+//         AnimatedBuilder(
+//           animation: particleCtrl,
+//           builder: (_, __) {
+//             return CustomPaint(
+//               painter: _ParticlePainter(particleCtrl.value),
+//             );
+//           },
+//         ),
+//       ],
+//     );
+//   }
+// }
 
-/// Floating glowing particles
-class _ParticlePainter extends CustomPainter {
-  final double progress;
-  final Random _rng = Random();
+// /// Floating glowing particles
+// class _ParticlePainter extends CustomPainter {
+//   final double progress;
+//   final Random _rng = Random();
 
-  _ParticlePainter(this.progress);
+//   _ParticlePainter(this.progress);
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.white24;
-    const particleCount = 45;
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     final paint = Paint()..color = Colors.white24;
+//     const particleCount = 45;
 
-    for (int i = 0; i < particleCount; i++) {
-      final x = (size.width * _rng.nextDouble());
-      final y = (size.height * ((i / particleCount + progress) % 1));
-      final radius = _rng.nextDouble() * 2 + 0.8;
+//     for (int i = 0; i < particleCount; i++) {
+//       final x = (size.width * _rng.nextDouble());
+//       final y = (size.height * ((i / particleCount + progress) % 1));
+//       final radius = _rng.nextDouble() * 2 + 0.8;
 
-      paint.color = Colors.white.withOpacity(0.1 + _rng.nextDouble() * 0.3);
+//       paint.color = Colors.white.withOpacity(0.1 + _rng.nextDouble() * 0.3);
 
-      canvas.drawCircle(Offset(x, y), radius, paint);
-    }
-  }
+//       canvas.drawCircle(Offset(x, y), radius, paint);
+//     }
+//   }
 
-  @override
-  bool shouldRepaint(covariant _ParticlePainter oldDelegate) => true;
-}
+//   @override
+//   bool shouldRepaint(covariant _ParticlePainter oldDelegate) => true;
+// }
 
-// ------------------ WORKED WITH SECTION ------------------
-class _WorkedWithSection extends StatelessWidget {
-  final Map<String, bool> boxHover;
-  final bool triggerCounters;
-  const _WorkedWithSection(
-      {required this.boxHover, required this.triggerCounters});
+// // ------------------ WORKED WITH SECTION ------------------
+// class _WorkedWithSection extends StatelessWidget {
+//   final Map<String, bool> boxHover;
+//   final bool triggerCounters;
+//   const _WorkedWithSection(
+//       {required this.boxHover, required this.triggerCounters});
 
-  @override
-  Widget build(BuildContext context) {
-    final companies = ["ClickUp", "Dropbox", "PAYCHEX", "elastic", "stripe"];
-    return Column(
-      children: [
-        const Text(
-          "Worked with",
-          style: TextStyle(color: Colors.greenAccent, fontSize: 18),
-        ),
-        const SizedBox(height: 20),
+//   @override
+//   Widget build(BuildContext context) {
+//     final companies = ["ClickUp", "Dropbox", "PAYCHEX", "elastic", "stripe"];
+//     return Column(
+//       children: [
+//         const Text(
+//           "Worked with",
+//           style: TextStyle(color: Colors.greenAccent, fontSize: 18),
+//         ),
+//         const SizedBox(height: 20),
 
-        /// ✨ Shimmering logo boxes
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          alignment: WrapAlignment.center,
-          children:
-              companies.map((c) => _CompanyTile(title: c)).toList(),
-        ),
+//         /// ✨ Shimmering logo boxes
+//         Wrap(
+//           spacing: 16,
+//           runSpacing: 16,
+//           alignment: WrapAlignment.center,
+//           children:
+//               companies.map((c) => _CompanyTile(title: c)).toList(),
+//         ),
 
-        const SizedBox(height: 28),
-        Wrap(
-          spacing: 16,
-          alignment: WrapAlignment.center,
-          children: [
-            _AnimatedCounter(label: "Years", endValue: 5, trigger: triggerCounters),
-            _AnimatedCounter(label: "Projects", endValue: 30, trigger: triggerCounters),
-            _AnimatedCounter(label: "Clients", endValue: 10, trigger: triggerCounters),
-          ],
-        ),
-      ],
-    );
-  }
-}
+//         const SizedBox(height: 28),
+//         Wrap(
+//           spacing: 16,
+//           alignment: WrapAlignment.center,
+//           children: [
+//             _AnimatedCounter(label: "Years", endValue: 5, trigger: triggerCounters),
+//             _AnimatedCounter(label: "Projects", endValue: 30, trigger: triggerCounters),
+//             _AnimatedCounter(label: "Clients", endValue: 10, trigger: triggerCounters),
+//           ],
+//         ),
+//       ],
+//     );
+//   }
+// }
 
-class _CompanyTile extends StatelessWidget {
-  final String title;
-  const _CompanyTile({required this.title});
+// class _CompanyTile extends StatelessWidget {
+//   final String title;
+//   const _CompanyTile({required this.title});
 
-  @override
-  Widget build(BuildContext context) {
-    return ShaderMask(
-      shaderCallback: (bounds) {
-        return LinearGradient(
-          colors: [
-            Colors.white.withOpacity(0.9),
-            Colors.white24,
-            Colors.white.withOpacity(0.9),
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ).createShader(bounds);
-      },
-      blendMode: BlendMode.srcATop,
-      child: Container(
-        width: 120,
-        height: 60,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.grey[900],
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          title,
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return ShaderMask(
+//       shaderCallback: (bounds) {
+//         return LinearGradient(
+//           colors: [
+//             Colors.white.withOpacity(0.9),
+//             Colors.white24,
+//             Colors.white.withOpacity(0.9),
+//           ],
+//           stops: const [0.0, 0.5, 1.0],
+//         ).createShader(bounds);
+//       },
+//       blendMode: BlendMode.srcATop,
+//       child: Container(
+//         width: 120,
+//         height: 60,
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(10),
+//           color: Colors.grey[900],
+//         ),
+//         alignment: Alignment.center,
+//         child: Text(
+//           title,
+//           style: const TextStyle(color: Colors.white70, fontSize: 14),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
-class _AnimatedCounter extends StatefulWidget {
-  final String label;
-  final int endValue;
-  final bool trigger;
-  const _AnimatedCounter(
-      {required this.label, required this.endValue, this.trigger = false});
+// class _AnimatedCounter extends StatefulWidget {
+//   final String label;
+//   final int endValue;
+//   final bool trigger;
+//   const _AnimatedCounter(
+//       {required this.label, required this.endValue, this.trigger = false});
 
-  @override
-  State<_AnimatedCounter> createState() => _AnimatedCounterState();
-}
+//   @override
+//   State<_AnimatedCounter> createState() => _AnimatedCounterState();
+// }
 
-class _AnimatedCounterState extends State<_AnimatedCounter>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _anim;
-  int displayed = 0;
+// class _AnimatedCounterState extends State<_AnimatedCounter>
+//     with SingleTickerProviderStateMixin {
+//   late AnimationController _ctrl;
+//   late Animation<double> _anim;
+//   int displayed = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-        vsync: this, duration: const Duration(seconds: 10));
-    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut)
-      ..addListener(() {
-        setState(() {
-          displayed = (_anim.value * widget.endValue).round();
-        });
-      });
-    if (widget.trigger) _ctrl.forward();
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     _ctrl = AnimationController(
+//         vsync: this, duration: const Duration(seconds: 10));
+//     _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut)
+//       ..addListener(() {
+//         setState(() {
+//           displayed = (_anim.value * widget.endValue).round();
+//         });
+//       });
+//     if (widget.trigger) _ctrl.forward();
+//   }
 
-  @override
-  void didUpdateWidget(covariant _AnimatedCounter oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.trigger && !oldWidget.trigger) _ctrl.forward(from: 0);
-  }
+//   @override
+//   void didUpdateWidget(covariant _AnimatedCounter oldWidget) {
+//     super.didUpdateWidget(oldWidget);
+//     if (widget.trigger && !oldWidget.trigger) _ctrl.forward(from: 0);
+//   }
 
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     _ctrl.dispose();
+//     super.dispose();
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          "$displayed+",
-          style: const TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.greenAccent),
-        ),
-        const SizedBox(height: 4),
-        Text(widget.label, style: const TextStyle(color: Colors.white70)),
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Column(
+//       children: [
+//         Text(
+//           "$displayed+",
+//           style: const TextStyle(
+//               fontSize: 20, fontWeight: FontWeight.bold, color: Colors.greenAccent),
+//         ),
+//         const SizedBox(height: 4),
+//         Text(widget.label, style: const TextStyle(color: Colors.white70)),
+//       ],
+//     );
+//   }
+// }
